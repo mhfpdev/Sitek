@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>não tem nd</title>
+    <style>
+        /* Resetando margens e padding */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            text-align: center;
+            padding: 50px;
+        }
+
+        h1 {
+            font-size: 4em;
+            margin-bottom: 20px;
+            color: #4CAF50;
+        }
+
+        p {
+            font-size: 1.5em;
+            margin-top: 30px;
+            color: #555;
+        }
+
+        .curiosity {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+            font-size: 2em;
+            color: #4CAF50;
+            width: 60%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .extra-message {
+            font-size: 2em;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Curiosidade Aleatória</h1>
+
+    <!-- A curiosidade vai ser exibida aqui -->
+    <div class="curiosity" id="curiosity"></div>
+
+    <!-- Mensagem adicional com variações -->
+    <p class="extra-message" id="extra-message"></p>
+
+    <script>
+        // Array com algumas curiosidades mais informais
+        const curiosities = [
+            "Sabia que o DNA humano é 60% igual ao da banana? Então, estamos mais próximos das bananas do que imaginamos!",
+            "Os polvos têm três corações! Acho que é por isso que são tão bons em tudo, né?",
+            "Água pode ferver e congelar ao mesmo tempo! Isso se chama 'ponto triplo'. Meio maluco, né?",
+            "Giraffes só têm sete vértebras no pescoço, assim como a gente. Mas o pescoço deles é bem maior!",
+            "Coca-Cola seria verde se não fosse colorida... Agora você não vai conseguir parar de imaginar a Coca verde!",
+            "Sabia que morcegos são os únicos mamíferos que podem voar? Pois é, eles têm essa habilidade irada!",
+            "A baleia-azul é o maior ser vivo do planeta! Ela pode chegar a 30 metros de comprimento. Tipo, uma coisa monstruosa!",
+            "O corpo humano tem cerca de 100 trilhões de células! Dá pra acreditar que somos basicamente feitos de células?",
+            "Os koalas passam até 22 horas dormindo por dia. Esse sim é o mestre da preguiça!",
+            "A lua está se afastando da Terra, acredite ou não, a cada ano ela se distancia 3,8 cm. Então, é melhor aproveitar a lua cheia enquanto ainda está por aqui!"
+        ];
+
+        // Variações da mensagem de "não tem nada aqui"
+        const extraMessages = [
+            "Ah, e não tem nada aqui.",
+            "Nada de interessante por aqui... só uma curiosidade aleatória.",
+            "Aqui? Não tem nada... só uma curiosidade pra te distrair.",
+            "Sem spoilers, só uma curiosidade pra você curtir!",
+            "Nada aqui além de uma curiosidade aleatória, aproveita!",
+            "Pois é, não tem nada aqui... Mas tem uma curiosidade legal!",
+            "Sério, não tem nada aqui... Só curiosidade mesmo.",
+            "Não tem nada, mas a curiosidade está aqui para te salvar!"
+        ];
+
+        // Função para selecionar uma curiosidade aleatória
+        function displayRandomCuriosity() {
+            const randomIndex = Math.floor(Math.random() * curiosities.length); // Gera um índice aleatório
+            const randomCuriosity = curiosities[randomIndex]; // Seleciona a curiosidade
+            document.getElementById("curiosity").innerText = randomCuriosity; // Exibe na tela
+        }
+
+        // Função para selecionar uma variação aleatória da mensagem "não tem nada aqui"
+        function displayRandomExtraMessage() {
+            const randomMessageIndex = Math.floor(Math.random() * extraMessages.length); // Gera um índice aleatório para as mensagens
+            const randomMessage = extraMessages[randomMessageIndex]; // Seleciona a mensagem
+            document.getElementById("extra-message").innerText = randomMessage; // Exibe na tela
+        }
+
+        // Chama as funções para exibir a curiosidade e a mensagem ao carregar a página
+        displayRandomCuriosity();
+        displayRandomExtraMessage();
+    </script>
+
+</body>
+</html>
