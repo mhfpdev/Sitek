@@ -1,197 +1,265 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<title>Presente Surpresa</title>
+<meta charset="UTF-8">
+<title>Xadrez Hardcore vs IA</title>
+
+<!-- LIBS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.13.4/chess.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css"/>
+
 <style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  body {
-    background: linear-gradient(135deg, #fdfbfb, #ebedee);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+body {
+    background: #0d1117;
+    color: #fff;
+    font-family: Arial;
     text-align: center;
-    padding: 50px;
-    color: #333;
-  }
-  h1 {
-    font-size: 2.5em;
-    margin-bottom: 20px;
-  }
-  .presente {
-    font-size: 180px;
-    cursor: pointer;
-    transition: transform 0.3s, filter 0.3s;
-    display: inline-block;
-    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.2));
-  }
-  .presente:hover {
-    transform: scale(1.1) rotate(5deg);
-    filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.4)) brightness(1.1);
-  }
-  #mensagem {
-    font-size: 28px;
-    margin-top: 20px;
-    background: #fff;
-    display: inline-block;
-    padding: 15px 30px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  }
-  #aviso {
+}
+
+h1 { color: #58a6ff; }
+
+#menu {
     margin-top: 30px;
-    font-weight: bold;
-    color: #c00;
-    font-size: 22px;
-  }
-  #arvore {
-    margin-top: 20px;
-    font-family: 'Courier New', monospace;
-    white-space: pre;
-    text-align: left;
-    display: inline-block;
+}
+
+button {
+    padding: 10px 20px;
+    background: #238636;
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+button:hover {
+    background: #2ea043;
+}
+
+#game {
+    display: none;
+}
+
+#board {
+    width: 420px;
+    margin: 20px auto;
+}
+
+#timer {
     font-size: 20px;
-    background: #fff;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    max-width: 95%;
-  }
+    margin: 10px;
+}
+
+select {
+    padding: 5px;
+    border-radius: 5px;
+}
 </style>
 </head>
+
 <body>
 
-<h1>Clique no presente 🎁</h1>
-<div class="presente" id="presente" title="Clique no presente 🎁">🎁</div>
-<div id="mensagem"></div>
-<div id="aviso"></div>
-<pre id="arvore"></pre>
+<h1>♟️ Xadrez vs IA Hardcore</h1>
+
+<div id="menu">
+    <button onclick="startGame()">▶️ PLAY</button>
+
+    <br><br>
+
+    Tema:
+    <select onchange="changeTheme(this.value)">
+        <option value="default">Clássico</option>
+        <option value="blue">Azul</option>
+        <option value="dark">Escuro</option>
+    </select>
+</div>
+
+<div id="game">
+    <div id="timer">10:00 | 10:00</div>
+    <div id="board"></div>
+    <button onclick="restartGame()">🔄 Reiniciar</button>
+</div>
 
 <script>
-  const presente = document.getElementById('presente');
-  const mensagem = document.getElementById('mensagem');
-  const aviso = document.getElementById('aviso');
-  const arvore = document.getElementById('arvore');
 
-  function detectarSO() {
-    const ua = navigator.userAgent;
-    if (/Windows/i.test(ua)) return 'Windows';
-    if (/Android/i.test(ua)) return 'Android';
-    if (/iPhone|iPad|iPod/i.test(ua)) return 'iOS';
-    if (/Mac/i.test(ua)) return 'Mac';
-    if (/Linux/i.test(ua)) return 'Linux';
-    return 'Desconhecido';
-  }
+var board
+var game = new Chess()
 
-  function gerarArvoreFake() {
-    const so = detectarSO();
-    if (so === 'Windows') {
-      return `
-C:\\
-├─ Documentos
-│  ├─ Trabalho.docx
-│  ├─ Receitas.pdf
-│  └─ Projeto
-│     ├─ main.py
-│     └─ README.md
-├─ Imagens
-│  ├─ férias.jpg
-│  └─ selfie.png
-└─ Música
-   ├─ rock.mp3
-   └─ jazz.mp3
-      `;
-    } else if (so === 'Android') {
-      return `
-/storage/emulated/0/
-├─ DCIM
-│  ├─ Camera
-│  │  ├─ foto1.jpg
-│  │  └─ foto2.png
-├─ Download
-│  ├─ arquivo.zip
-│  └─ video.mp4
-├─ WhatsApp
-│  ├─ Media
-│  └─ Databases
-└─ Music
-   ├─ funk.mp3
-   └─ pop.mp3
-      `;
-    } else if (so === 'iOS') {
-      return `
-/var/mobile/
-├─ Documents
-│  ├─ notas.txt
-│  └─ tarefas.pdf
-├─ DCIM
-│  ├─ 100APPLE
-│  │  ├─ IMG_0001.JPG
-│  │  └─ IMG_0002.JPG
-└─ Music
-   ├─ song1.m4a
-   └─ song2.m4a
-      `;
-    } else if (so === 'Mac') {
-      return `
-/Users/usuario/
-├─ Documents
-│  ├─ trabalho.pages
-│  └─ contas.numbers
-├─ Pictures
-│  ├─ viagem.jpg
-└─ Music
-   ├─ rock.mp3
-   └─ podcast.mp3
-      `;
-    } else if (so === 'Linux') {
-      return `
-/home/usuario/
-├─ Documentos
-│  ├─ projetos
-│  │  └─ script.py
-│  └─ notas.txt
-├─ Imagens
-│  ├─ wallpaper.png
-└─ Música
-   ├─ rap.mp3
-   └─ samba.mp3
-      `;
-    } else {
-      return `
-Sistema não identificado.
-└─ Sem dados disponíveis.
-      `;
+var whiteTime = 600
+var blackTime = 600
+var timerInterval
+
+function startGame() {
+    document.getElementById("menu").style.display = "none"
+    document.getElementById("game").style.display = "block"
+    initBoard()
+    startTimer()
+}
+
+function restartGame() {
+    game = new Chess()
+    board.position('start')
+    whiteTime = 600
+    blackTime = 600
+}
+
+function initBoard() {
+    var config = {
+        draggable: true,
+        position: 'start',
+        pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
+        onDragStart: onDragStart,
+        onDrop: onDrop
     }
-  }
+    board = Chessboard('board', config)
+}
 
-  function baixarArquivo() {
-    const link = document.createElement('a');
-    const blob = new Blob(["Gostou do presente? 😉"], {type: 'text/plain'});
-    const url = URL.createObjectURL(blob);
-    link.href = url;
-    link.download = 'Gostou do presente 😉.txt';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }
+function onDragStart(source, piece) {
+    if (game.game_over()) return false
+    if (piece.search(/^b/) !== -1) return false
+}
 
-  presente.onclick = () => {
-    mensagem.textContent = 'O presente é um parabéns 👏👏';
-    aviso.textContent = 'Ah, agora tenho acesso a boa parte dos seus arquivos 😉, ou não. ASS: Não é o Miguel';
+function onDrop(source, target) {
+    var move = game.move({
+        from: source,
+        to: target,
+        promotion: 'q'
+    })
 
-    setTimeout(() => {
-      arvore.textContent = gerarArvoreFake();
-    }, 2000);
+    if (move === null) return 'snapback'
 
-    setTimeout(() => {
-      baixarArquivo();
-    }, 4000);
-  };
+    checkGameState()
+
+    setTimeout(makeBestMove, 200)
+}
+
+function makeBestMove() {
+    var move = minimaxRoot(3, game, true)
+    game.move(move)
+    board.position(game.fen())
+
+    checkGameState()
+}
+
+function checkGameState() {
+    if (game.in_checkmate()) {
+        setTimeout(() => {
+            alert("💀 CHECKMATE!")
+            restartGame()
+        }, 200)
+    }
+
+    if (game.in_draw()) {
+        setTimeout(() => {
+            alert("🤝 EMPATE!")
+            restartGame()
+        }, 200)
+    }
+}
+
+/* IA */
+
+function minimaxRoot(depth, game, isMaximisingPlayer) {
+    var moves = game.moves()
+    var bestMove = -9999
+    var bestMoveFound
+
+    for (var i = 0; i < moves.length; i++) {
+        var move = moves[i]
+        game.move(move)
+        var value = minimax(depth - 1, game, -10000, 10000, !isMaximisingPlayer)
+        game.undo()
+        if (value >= bestMove) {
+            bestMove = value
+            bestMoveFound = move
+        }
+    }
+    return bestMoveFound
+}
+
+function minimax(depth, game, alpha, beta, isMaximisingPlayer) {
+    if (depth === 0) return -evaluateBoard(game.board())
+
+    var moves = game.moves()
+
+    if (isMaximisingPlayer) {
+        var best = -9999
+        for (var i = 0; i < moves.length; i++) {
+            game.move(moves[i])
+            best = Math.max(best, minimax(depth - 1, game, alpha, beta, false))
+            game.undo()
+            alpha = Math.max(alpha, best)
+            if (beta <= alpha) return best
+        }
+        return best
+    } else {
+        var best = 9999
+        for (var i = 0; i < moves.length; i++) {
+            game.move(moves[i])
+            best = Math.min(best, minimax(depth - 1, game, alpha, beta, true))
+            game.undo()
+            beta = Math.min(beta, best)
+            if (beta <= alpha) return best
+        }
+        return best
+    }
+}
+
+function evaluateBoard(board) {
+    var total = 0
+    var values = { p: 10, r: 50, n: 30, b: 30, q: 90, k: 900 }
+
+    for (var i = 0; i < 8; i++) {
+        for (var j = 0; j < 8; j++) {
+            var piece = board[i][j]
+            if (piece !== null) {
+                var value = values[piece.type]
+                total += piece.color === 'w' ? value : -value
+            }
+        }
+    }
+    return total
+}
+
+/* TIMER */
+
+function startTimer() {
+    clearInterval(timerInterval)
+
+    timerInterval = setInterval(() => {
+        if (game.turn() === 'w') whiteTime--
+        else blackTime--
+
+        if (whiteTime <= 0 || blackTime <= 0) {
+            alert("⏱️ Tempo acabou!")
+            restartGame()
+        }
+
+        document.getElementById("timer").innerText =
+            format(whiteTime) + " | " + format(blackTime)
+    }, 1000)
+}
+
+function format(t) {
+    let m = Math.floor(t / 60)
+    let s = t % 60
+    return m + ":" + (s < 10 ? "0" + s : s)
+}
+
+/* TEMAS */
+
+function changeTheme(theme) {
+    let boardEl = document.getElementById("board")
+
+    if (theme === "blue") {
+        boardEl.style.filter = "hue-rotate(180deg)"
+    } else if (theme === "dark") {
+        boardEl.style.filter = "brightness(0.7)"
+    } else {
+        boardEl.style.filter = "none"
+    }
+}
+
 </script>
-
 </body>
 </html>
