@@ -1,265 +1,172 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Xadrez Hardcore vs IA</title>
-
-<!-- LIBS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.13.4/chess.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css"/>
-
-<style>
-body {
-    background: #0d1117;
-    color: #fff;
-    font-family: Arial;
-    text-align: center;
-}
-
-h1 { color: #58a6ff; }
-
-#menu {
-    margin-top: 30px;
-}
-
-button {
-    padding: 10px 20px;
-    background: #238636;
-    border: none;
-    color: white;
-    cursor: pointer;
-    border-radius: 8px;
-}
-
-button:hover {
-    background: #2ea043;
-}
-
-#game {
-    display: none;
-}
-
-#board {
-    width: 420px;
-    margin: 20px auto;
-}
-
-#timer {
-    font-size: 20px;
-    margin: 10px;
-}
-
-select {
-    padding: 5px;
-    border-radius: 5px;
-}
-</style>
+  <meta charset="UTF-8">
+  <title>Xadrez vs IA</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css"/>
+  <style>
+    body { font-family: Arial; text-align: center; background: #111; color: #fff; }
+    #board { width: 400px; margin: 20px auto; }
+    button { padding: 10px; margin: 5px; }
+    #rules { max-width: 600px; margin: auto; text-align: left; }
+  </style>
 </head>
-
 <body>
+  <h1>Xadrez vs IA</h1>
 
-<h1>♟️ Xadrez vs IA Hardcore</h1>
+  
 
-<div id="menu">
-    <button onclick="startGame()">▶️ PLAY</button>
+  <div id="timer">Tempo: 10:00 | 10:00</div>
 
-    <br><br>
+  <div id="board"></div>
 
-    Tema:
-    <select onchange="changeTheme(this.value)">
-        <option value="default">Clássico</option>
-        <option value="blue">Azul</option>
-        <option value="dark">Escuro</option>
-    </select>
-</div>
-
-<div id="game">
-    <div id="timer">10:00 | 10:00</div>
-    <div id="board"></div>
-    <button onclick="restartGame()">🔄 Reiniciar</button>
-</div>
+  <h2>Regras do Xadrez</h2>
+  <div id="rules">
+    <ul>
+      <li>Objetivo: dar xeque-mate no rei adversário</li>
+      <li>Cada peça tem movimentos específicos</li>
+      <li>Peão move para frente, captura na diagonal</li>
+      <li>Roque: movimento especial entre rei e torre</li>
+      <li>En passant e promoção são regras especiais</li>
+      <li>Empate pode ocorrer por repetição ou falta de material</li>
+    </ul>
+  </div>
 
 <script>
+  var board = null
+  var game = new Chess()
+  // dificuldade fixa (modo difícil)
 
-var board
-var game = new Chess()
+  
 
-var whiteTime = 600
-var blackTime = 600
-var timerInterval
-
-function startGame() {
-    document.getElementById("menu").style.display = "none"
-    document.getElementById("game").style.display = "block"
-    initBoard()
-    startTimer()
-}
-
-function restartGame() {
-    game = new Chess()
-    board.position('start')
-    whiteTime = 600
-    blackTime = 600
-}
-
-function initBoard() {
-    var config = {
-        draggable: true,
-        position: 'start',
-        pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
-        onDragStart: onDragStart,
-        onDrop: onDrop
-    }
-    board = Chessboard('board', config)
-}
-
-function onDragStart(source, piece) {
+  function onDragStart (source, piece) {
     if (game.game_over()) return false
     if (piece.search(/^b/) !== -1) return false
-}
+  }
 
-function onDrop(source, target) {
-    var move = game.move({
-        from: source,
-        to: target,
-        promotion: 'q'
-    })
-
-    if (move === null) return 'snapback'
-
-    checkGameState()
-
-    setTimeout(makeBestMove, 200)
-}
-
-function makeBestMove() {
-    var move = minimaxRoot(3, game, true)
-    game.move(move)
+  function makeBestMove () {
+    var bestMove = getBestMove(game)
+    game.move(bestMove)
     board.position(game.fen())
+  }
 
-    checkGameState()
-}
+  function getBestMove(game) {
+    return minimaxRoot(3, game, true)
+  }
 
-function checkGameState() {
-    if (game.in_checkmate()) {
-        setTimeout(() => {
-            alert("💀 CHECKMATE!")
-            restartGame()
-        }, 200)
+    if (difficulty === 2) {
+      return moves[Math.floor(Math.random() * moves.length / 2)]
     }
 
-    if (game.in_draw()) {
-        setTimeout(() => {
-            alert("🤝 EMPATE!")
-            restartGame()
-        }, 200)
+    if (difficulty === 3) {
+      return minimaxRoot(2, game, true)
     }
-}
+  }
 
-/* IA */
-
-function minimaxRoot(depth, game, isMaximisingPlayer) {
-    var moves = game.moves()
+  function minimaxRoot(depth, game, isMaximisingPlayer) {
+    var newGameMoves = game.moves()
     var bestMove = -9999
     var bestMoveFound
 
-    for (var i = 0; i < moves.length; i++) {
-        var move = moves[i]
-        game.move(move)
-        var value = minimax(depth - 1, game, -10000, 10000, !isMaximisingPlayer)
-        game.undo()
-        if (value >= bestMove) {
-            bestMove = value
-            bestMoveFound = move
-        }
+    for (var i = 0; i < newGameMoves.length; i++) {
+      var newGameMove = newGameMoves[i]
+      game.move(newGameMove)
+      var value = minimax(depth - 1, game, -10000, 10000, !isMaximisingPlayer)
+      game.undo()
+      if (value >= bestMove) {
+        bestMove = value
+        bestMoveFound = newGameMove
+      }
     }
     return bestMoveFound
-}
+  }
 
-function minimax(depth, game, alpha, beta, isMaximisingPlayer) {
-    if (depth === 0) return -evaluateBoard(game.board())
+  function minimax (depth, game, alpha, beta, isMaximisingPlayer) {
+    if (depth === 0) {
+      return -evaluateBoard(game.board())
+    }
 
-    var moves = game.moves()
+    var newGameMoves = game.moves()
 
     if (isMaximisingPlayer) {
-        var best = -9999
-        for (var i = 0; i < moves.length; i++) {
-            game.move(moves[i])
-            best = Math.max(best, minimax(depth - 1, game, alpha, beta, false))
-            game.undo()
-            alpha = Math.max(alpha, best)
-            if (beta <= alpha) return best
+      var bestMove = -9999
+      for (var i = 0; i < newGameMoves.length; i++) {
+        game.move(newGameMoves[i])
+        bestMove = Math.max(bestMove, minimax(depth - 1, game, alpha, beta, !isMaximisingPlayer))
+        game.undo()
+        alpha = Math.max(alpha, bestMove)
+        if (beta <= alpha) {
+          return bestMove
         }
-        return best
+      }
+      return bestMove
     } else {
-        var best = 9999
-        for (var i = 0; i < moves.length; i++) {
-            game.move(moves[i])
-            best = Math.min(best, minimax(depth - 1, game, alpha, beta, true))
-            game.undo()
-            beta = Math.min(beta, best)
-            if (beta <= alpha) return best
+      var bestMove = 9999
+      for (var i = 0; i < newGameMoves.length; i++) {
+        game.move(newGameMoves[i])
+        bestMove = Math.min(bestMove, minimax(depth - 1, game, alpha, beta, !isMaximisingPlayer))
+        game.undo()
+        beta = Math.min(beta, bestMove)
+        if (beta <= alpha) {
+          return bestMove
         }
-        return best
+      }
+      return bestMove
     }
-}
+  }
 
-function evaluateBoard(board) {
+  function evaluateBoard(board) {
     var total = 0
     var values = { p: 10, r: 50, n: 30, b: 30, q: 90, k: 900 }
 
     for (var i = 0; i < 8; i++) {
-        for (var j = 0; j < 8; j++) {
-            var piece = board[i][j]
-            if (piece !== null) {
-                var value = values[piece.type]
-                total += piece.color === 'w' ? value : -value
-            }
+      for (var j = 0; j < 8; j++) {
+        var piece = board[i][j]
+        if (piece !== null) {
+          var value = values[piece.type]
+          total += piece.color === 'w' ? value : -value
         }
+      }
     }
     return total
-}
+  }
 
-/* TIMER */
+  function onDrop (source, target) {
+    var move = game.move({ from: source, to: target, promotion: 'q' })
 
-function startTimer() {
-    clearInterval(timerInterval)
+    if (move === null) return 'snapback'
 
-    timerInterval = setInterval(() => {
-        if (game.turn() === 'w') whiteTime--
-        else blackTime--
+    window.setTimeout(makeBestMove, 250)
+  }
 
-        if (whiteTime <= 0 || blackTime <= 0) {
-            alert("⏱️ Tempo acabou!")
-            restartGame()
-        }
+  var config = {
+    draggable: true,
+    position: 'start',
+    onDragStart: onDragStart,
+    onDrop: onDrop
+  }
 
-        document.getElementById("timer").innerText =
-            format(whiteTime) + " | " + format(blackTime)
-    }, 1000)
-}
+  board = Chessboard('board', config)
 
-function format(t) {
-    let m = Math.floor(t / 60)
-    let s = t % 60
-    return m + ":" + (s < 10 ? "0" + s : s)
-}
+  // TIMER
+  var whiteTime = 600
+  var blackTime = 600
 
-/* TEMAS */
+  setInterval(function() {
+    if (game.turn() === 'w') whiteTime--
+    else blackTime--
 
-function changeTheme(theme) {
-    let boardEl = document.getElementById("board")
+    document.getElementById("timer").innerText =
+      `Tempo: ${format(whiteTime)} | ${format(blackTime)}`
+  }, 1000)
 
-    if (theme === "blue") {
-        boardEl.style.filter = "hue-rotate(180deg)"
-    } else if (theme === "dark") {
-        boardEl.style.filter = "brightness(0.7)"
-    } else {
-        boardEl.style.filter = "none"
-    }
-}
-
+  function format(t) {
+    var m = Math.floor(t/60)
+    var s = t%60
+    return m + ':' + (s<10?'0'+s:s)
+  }
 </script>
 </body>
 </html>
