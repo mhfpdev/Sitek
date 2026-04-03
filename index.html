@@ -1,628 +1,178 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Xadrez vs IA — Batalha Épica</title>
-  <!-- Bibliotecas -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css"/>
-  <!-- Google Fonts + Ícones -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      user-select: none;
-    }
+<meta charset="UTF-8">
+<title>Xadrez Hardcore vs IA</title>
 
-    body {
-      background: radial-gradient(circle at 20% 30%, #0a0f1e, #03060c);
-      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 2rem 1rem;
-    }
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css"/>
 
-    /* Container principal com vidro e borda futurista */
-    .game-container {
-      max-width: 780px;
-      width: 100%;
-      background: rgba(10, 20, 30, 0.45);
-      backdrop-filter: blur(12px);
-      border-radius: 3rem;
-      padding: 1.8rem 1.5rem 2rem;
-      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 215, 150, 0.25);
-      transition: all 0.3s ease;
-    }
-
-    h1 {
-      font-size: 2.3rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #F9E0A0, #D4AF37, #FFD966);
-      background-clip: text;
-      -webkit-background-clip: text;
-      color: transparent;
-      text-shadow: 0 2px 5px rgba(0,0,0,0.3);
-      letter-spacing: -0.5px;
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    h1 i {
-      background: none;
-      color: #e3b23c;
-      text-shadow: 0 0 8px #ffb347;
-      font-size: 2rem;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      flex-wrap: wrap;
-      margin-bottom: 1rem;
-      gap: 10px;
-      border-bottom: 2px dashed rgba(212, 175, 55, 0.5);
-      padding-bottom: 0.8rem;
-    }
-
-    /* Timer premium */
-    .timer-panel {
-      background: #0B1120cc;
-      backdrop-filter: blur(4px);
-      padding: 0.5rem 1rem;
-      border-radius: 60px;
-      display: flex;
-      gap: 1rem;
-      font-weight: 700;
-      border: 1px solid rgba(212, 175, 55, 0.5);
-      box-shadow: 0 0 12px rgba(0,0,0,0.5);
-    }
-
-    .timer-box {
-      background: #00000066;
-      padding: 0.3rem 1rem;
-      border-radius: 2rem;
-      font-family: monospace;
-      font-size: 1.45rem;
-      letter-spacing: 2px;
-      color: #f5e7c8;
-    }
-
-    .timer-label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      font-weight: 500;
-      color: #bd9e5a;
-    }
-
-    /* Área do tabuleiro com glow */
-    .board-wrapper {
-      display: flex;
-      justify-content: center;
-      margin: 1.5rem 0;
-      position: relative;
-    }
-
-    #board {
-      width: 100%;
-      max-width: 520px;
-      border-radius: 20px;
-      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.6), 0 0 0 4px #2a2418, 0 0 0 8px #1f1b12;
-      transition: transform 0.2s;
-    }
-
-    /* Customização das peças e casas via overlay de CSS (melhora o visual) */
-    .chessboard-1-0-0 .square-55d63 {
-      transition: all 0.1s ease;
-    }
-    .chessboard-1-0-0 .black-square-1c1d2 {
-      background-color: #2c2b2a !important;
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2);
-    }
-    .chessboard-1-0-0 .white-square-1e2d7 {
-      background-color: #efe0c9 !important;
-      box-shadow: inset 0 0 0 1px rgba(255,255,200,0.3);
-    }
-    /* highlight elegante ao arrastar */
-    .chessboard-1-0-0 .square-55d63.highlight {
-      box-shadow: inset 0 0 0 3px #ffd966, 0 0 15px 2px #ffbf00;
-    }
-
-    /* Regras estilizadas */
-    .rules-section {
-      margin-top: 2rem;
-      background: rgba(0, 0, 0, 0.55);
-      border-radius: 2rem;
-      padding: 1rem 1.5rem;
-      backdrop-filter: blur(4px);
-      border: 1px solid rgba(212, 175, 55, 0.3);
-      transition: 0.2s;
-    }
-
-    .rules-section h2 {
-      font-size: 1.2rem;
-      font-weight: 600;
-      letter-spacing: 1px;
-      color: #e9c47e;
-      margin-bottom: 0.8rem;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      border-left: 3px solid #e3b23c;
-      padding-left: 12px;
-    }
-
-    .rules-section ul {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.6rem 1.2rem;
-      list-style: none;
-    }
-
-    .rules-section li {
-      font-size: 0.85rem;
-      background: rgba(255, 215, 150, 0.1);
-      padding: 0.25rem 0.9rem;
-      border-radius: 30px;
-      color: #e8dbbc;
-      font-weight: 400;
-      backdrop-filter: blur(2px);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .rules-section li i {
-      color: #ffcd7e;
-      font-size: 0.75rem;
-    }
-
-    button {
-      background: linear-gradient(95deg, #2a2418, #1e1912);
-      border: none;
-      color: #f7e5c2;
-      padding: 0.5rem 1.3rem;
-      border-radius: 40px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      border: 1px solid rgba(212, 175, 55, 0.6);
-    }
-
-    button:hover {
-      background: linear-gradient(95deg, #3e3522, #2e261b);
-      transform: scale(0.97);
-      border-color: #e3b23c;
-      box-shadow: 0 0 10px rgba(227, 178, 60, 0.4);
-      color: #fff0d0;
-    }
-
-    .reset-btn {
-      margin-top: 0.5rem;
-      background: #1e2a2f;
-      border-color: #6c8b6e;
-    }
-
-    .footer-status {
-      margin-top: 0.8rem;
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: #cdba87;
-      background: #00000055;
-      display: inline-block;
-      padding: 0.2rem 1rem;
-      border-radius: 30px;
-      backdrop-filter: blur(4px);
-    }
-
-    /* Animações e responsivo */
-    @media (max-width: 560px) {
-      .game-container { padding: 1rem; }
-      .timer-box { font-size: 1rem; padding: 0.1rem 0.8rem; }
-      h1 { font-size: 1.6rem; }
-    }
-
-    /* Overlay de xeque-mate/vitória */
-    .game-status-message {
-      text-align: center;
-      font-weight: bold;
-      background: radial-gradient(ellipse at center, #e9b13b, #b57c1c);
-      background-clip: text;
-      -webkit-background-clip: text;
-      color: transparent;
-      text-shadow: 0 0 5px #ffd58c;
-      font-size: 1rem;
-    }
-  </style>
+<style>
+body {
+    background: #0d1117;
+    color: #fff;
+    font-family: Arial;
+    text-align: center;
+}
+#board { width: 420px; margin: 20px auto; }
+button { padding: 10px; margin: 5px; }
+</style>
 </head>
 <body>
-<div class="game-container">
-  <div class="header">
-    <h1><i class="fas fa-chess-queen"></i> Xadrez vs IA</h1>
-    <div class="timer-panel">
-      <div><span class="timer-label"><i class="far fa-clock"></i> BRANCAS</span><br><span id="whiteTimer" class="timer-box">10:00</span></div>
-      <div><span class="timer-label"><i class="fas fa-microchip"></i> IA (PRETAS)</span><br><span id="blackTimer" class="timer-box">10:00</span></div>
-    </div>
-  </div>
 
-  <div class="board-wrapper">
-    <div id="board"></div>
-  </div>
-
-  <div style="display: flex; justify-content: center; gap: 15px; margin-top: 5px;">
-    <button id="resetGameBtn" class="reset-btn"><i class="fas fa-sync-alt"></i> Novo Jogo</button>
-  </div>
-  <div id="gameStatus" class="footer-status" style="margin-top: 12px; text-align: center;"></div>
-
-  <div class="rules-section">
-    <h2><i class="fas fa-scroll"></i> Código do Jogo & Regras</h2>
-    <ul>
-      <li><i class="fas fa-crown"></i> Xeque-mate vence a partida</li>
-      <li><i class="fas fa-chess-pawn"></i> Peão: frente / captura diagonal</li>
-      <li><i class="fas fa-exchange-alt"></i> Roque, En Passant, Promoção</li>
-      <li><i class="fas fa-brain"></i> IA nível "Grão-Mestre" (Minimax prof. 3)</li>
-      <li><i class="fas fa-hourglass-half"></i> Tempo limite: se acabar, derrota</li>
-      <li><i class="fas fa-chart-line"></i> Avaliação material + posicional</li>
-    </ul>
-  </div>
-</div>
+<h1>♟️ Xadrez vs IA</h1>
+<button onclick="startGame()">▶️ Play</button>
+<div id="timer">10:00 | 10:00</div>
+<div id="board"></div>
+<button onclick="restartGame()">🔄 Reiniciar</button>
 
 <script>
-  // ======================== XADREZ + IA AVANÇADA (Minimax com AlphaBeta + heurística) ========================
-  let board = null;
-  let game = new Chess();
-  let gameOverFlag = false;
-  let whiteTime = 600;      // 10 minutos em segundos
-  let blackTime = 600;
-  let timerInterval = null;
-  let aiThinking = false;
-  let movePending = false;
 
-  // Avaliação heurística melhorada: valor de peças + tabela de posição (simplificada para peões e cavalos, mas eficaz)
-  function evaluateBoardAdvanced(boardState) {
-    let total = 0;
-    // Valores base (centopeões)
-    const pieceValues = {
-      'p': 100,   // peão
-      'n': 320,   // cavalo
-      'b': 330,   // bispo
-      'r': 500,   // torre
-      'q': 900,   // rainha
-      'k': 20000  // rei
-    };
-    
-    // Pequenas tabelas posicionais (incentiva centro e desenvolvimento)
-    // Peão: valoriza avanço e centro
-    const pawnTableWhite = [
-      0,  0,  0,  0,  0,  0,  0,  0,
-      5, 10, 10,-20,-20, 10, 10,  5,
-      2,  4,  8, 12, 12,  8,  4,  2,
-      0,  2,  4,  8,  8,  4,  2,  0,
-      0,  0,  2,  6,  6,  2,  0,  0,
-      0,  0,  1,  2,  2,  1,  0,  0,
-      0,  0,  0,  0,  0,  0,  0,  0,
-      0,  0,  0,  0,  0,  0,  0,  0
-    ];
-    const pawnTableBlack = [...pawnTableWhite].reverse();
-    
-    // Cavalo: centro melhor
-    const knightTable = [
-      -10,-5, 0, 0, 0, 0,-5,-10,
-      -5, 0, 5, 5, 5, 5, 0,-5,
-      0, 5,10,12,12,10, 5, 0,
-      0, 5,10,12,12,10, 5, 0,
-      0, 5,10,12,12,10, 5, 0,
-      0, 5,10,12,12,10, 5, 0,
-      -5, 0, 5, 8, 8, 5, 0,-5,
-      -10,-5, 0, 2, 2, 0,-5,-10
-    ];
-    
-    for (let i = 0; i < 8; i++) {
-      for (let j = 0; j < 8; j++) {
-        const piece = boardState[i][j];
-        if (piece !== null) {
-          let value = pieceValues[piece.type];
-          let positionalBonus = 0;
-          const squareIdx = i * 8 + j;
-          
-          // Bônus posicional para peças específicas
-          if (piece.type === 'p') {
-            if (piece.color === 'w') positionalBonus = pawnTableWhite[squareIdx];
-            else positionalBonus = pawnTableBlack[squareIdx];
-          }
-          if (piece.type === 'n') {
-            positionalBonus = knightTable[squareIdx];
-          }
-          if (piece.type === 'b') {
-            // leve bônus para bispos em casas claras/escuras? apenas incentivo central
-            positionalBonus = (i>=2 && i<=5 && j>=2 && j<=5) ? 12 : 2;
-          }
-          if (piece.type === 'r') {
-            positionalBonus = (i===0 || i===7) ? 8 : 2;
-          }
-          if (piece.type === 'q') {
-            positionalBonus = (i>=1 && i<=6 && j>=1 && j<=6) ? 6 : 0;
-          }
-          if (piece.type === 'k') {
-            // segurança do rei no final de jogo pode ser ajustado, mas mantemos simples
-            positionalBonus = (piece.color === 'w' && i===0) ? 10 : (piece.color === 'b' && i===7) ? 10 : 0;
-          }
-          
-          let pieceScore = value + positionalBonus;
-          total += (piece.color === 'w') ? pieceScore : -pieceScore;
-        }
-      }
-    }
-    // Mobilidade básica (número de movimentos)
-    const moves = game.moves({ verbose: true });
-    const whiteMobility = moves.filter(m => m.color === 'w').length;
-    const blackMobility = moves.filter(m => m.color === 'b').length;
-    total += (whiteMobility - blackMobility) * 5;
-    
-    return total;
-  }
+var board
+var game
 
-  // Minimax com poda alpha-beta (profundidade 3 para IA forte e responsiva)
-  function minimax(depth, gameState, alpha, beta, isMaximizing) {
-    if (depth === 0 || gameState.game_over()) {
-      return evaluateBoardAdvanced(gameState.board());
+var whiteTime = 600
+var blackTime = 600
+
+function startGame() {
+    game = new Chess()
+
+    var config = {
+        draggable: true,
+        position: 'start',
+        pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
+        onDragStart: onDragStart,
+        onDrop: onDrop
     }
-    
-    const moves = gameState.moves();
-    if (isMaximizing) {
-      let maxEval = -Infinity;
-      for (const move of moves) {
-        gameState.move(move);
-        let eval = minimax(depth - 1, gameState, alpha, beta, false);
-        gameState.undo();
-        maxEval = Math.max(maxEval, eval);
-        alpha = Math.max(alpha, eval);
-        if (beta <= alpha) break;
-      }
-      return maxEval;
-    } else {
-      let minEval = Infinity;
-      for (const move of moves) {
-        gameState.move(move);
-        let eval = minimax(depth - 1, gameState, alpha, beta, true);
-        gameState.undo();
-        minEval = Math.min(minEval, eval);
-        beta = Math.min(beta, eval);
-        if (beta <= alpha) break;
-      }
-      return minEval;
+
+    board = Chessboard('board', config)
+    startTimer()
+}
+
+function restartGame() {
+    game = new Chess()
+    board.position('start')
+    whiteTime = 600
+    blackTime = 600
+}
+
+function onDragStart(source, piece) {
+    if (game.game_over()) return false
+    if (piece.search(/^b/) !== -1) return false
+}
+
+function onDrop(source, target) {
+    var move = game.move({
+        from: source,
+        to: target,
+        promotion: 'q'
+    })
+
+    if (move === null) {
+        return 'snapback'
     }
-  }
-  
-  function getBestMove(currentGame, depth = 3) {
-    const moves = currentGame.moves();
-    if (moves.length === 0) return null;
-    
-    let bestEval = -Infinity;
-    let bestMove = moves[0];
-    
-    for (const move of moves) {
-      currentGame.move(move);
-      let moveEval = minimax(depth - 1, currentGame, -Infinity, Infinity, false);
-      currentGame.undo();
-      
-      if (moveEval > bestEval) {
-        bestEval = moveEval;
-        bestMove = move;
-      }
+
+    setTimeout(makeBestMove, 200)
+}
+
+function makeBestMove() {
+    var move = minimaxRoot(3, game, true)
+    game.move(move)
+    board.position(game.fen())
+
+    if (game.in_checkmate()) {
+        alert("💀 CHECKMATE")
+        restartGame()
     }
-    return bestMove;
-  }
-  
-  // Movimento da IA com delay e verificação de game over
-  async function makeAIMove() {
-    if (aiThinking) return;
-    if (gameOverFlag) return;
-    if (game.game_over()) {
-      updateGameStatusMessage();
-      return;
-    }
-    if (game.turn() !== 'b') return;
-    
-    aiThinking = true;
-    
-    // pequeno delay para simular "pensamento" e fluidez
-    await new Promise(resolve => setTimeout(resolve, 80));
-    
-    if (game.game_over() || game.turn() !== 'b') {
-      aiThinking = false;
-      return;
-    }
-    
-    const bestMove = getBestMove(game, 3);
-    if (bestMove) {
-      const moveResult = game.move(bestMove);
-      if (moveResult) {
-        board.position(game.fen());
-        updateGameStatusMessage();
-        // Verificar se acabou o jogo após movimento IA
-        if (game.game_over()) {
-          gameOverFlag = true;
-          if (timerInterval) clearInterval(timerInterval);
-          updateGameStatusMessage();
+}
+
+function minimaxRoot(depth, game, isMaximisingPlayer) {
+    var moves = game.moves()
+    var bestMove = -9999
+    var bestMoveFound
+
+    for (var i = 0; i < moves.length; i++) {
+        var move = moves[i]
+        game.move(move)
+        var value = minimax(depth - 1, game, -10000, 10000, false)
+        game.undo()
+        if (value >= bestMove) {
+            bestMove = value
+            bestMoveFound = move
         }
-      }
     }
-    aiThinking = false;
-    updateTimersDisplay(); // apenas atualiza display
-  }
-  
-  // Eventos do jogador humano (brancas)
-  function onDragStart(source, piece) {
-    if (gameOverFlag) return false;
-    if (game.game_over()) return false;
-    // Se não é turno das brancas ou jogo acabou
-    if (game.turn() !== 'w') return false;
-    // Peça preta não pode mover
-    if (piece.search(/^b/) !== -1) return false;
-    return true;
-  }
-  
-  function onDrop(source, target) {
-    if (gameOverFlag) return 'snapback';
-    if (game.game_over()) return 'snapback';
-    if (game.turn() !== 'w') return 'snapback';
-    
-    const move = game.move({
-      from: source,
-      to: target,
-      promotion: 'q'   // sempre promove para rainha
-    });
-    
-    if (move === null) return 'snapback';
-    
-    // atualiza tabuleiro
-    board.position(game.fen());
-    updateGameStatusMessage();
-    
-    // Verificar se jogo acabou após movimento humano
-    if (game.game_over()) {
-      gameOverFlag = true;
-      if (timerInterval) clearInterval(timerInterval);
-      updateGameStatusMessage();
-      return;
-    }
-    
-    // IA move depois de um tempo (se jogo não acabou)
-    setTimeout(() => {
-      if (!game.game_over() && game.turn() === 'b' && !gameOverFlag) {
-        makeAIMove();
-        updateGameStatusMessage();
-        if (game.game_over()) {
-          gameOverFlag = true;
-          if (timerInterval) clearInterval(timerInterval);
-          updateGameStatusMessage();
+    return bestMoveFound
+}
+
+function minimax(depth, game, alpha, beta, isMaximisingPlayer) {
+    if (depth === 0) return -evaluateBoard(game.board())
+
+    var moves = game.moves()
+
+    if (isMaximisingPlayer) {
+        var best = -9999
+        for (var i = 0; i < moves.length; i++) {
+            game.move(moves[i])
+            best = Math.max(best, minimax(depth - 1, game, alpha, beta, false))
+            game.undo()
+            alpha = Math.max(alpha, best)
+            if (beta <= alpha) return best
         }
-      }
-    }, 80);
-    return;
-  }
-  
-  // Atualiza mensagem de status (xeque, xeque-mate, etc)
-  function updateGameStatusMessage() {
-    const statusDiv = document.getElementById('gameStatus');
-    if (!statusDiv) return;
-    if (game.game_over()) {
-      if (game.in_checkmate()) {
-        const loser = game.turn() === 'w' ? 'Brancas' : 'Pretas (IA)';
-        const winner = loser === 'Brancas' ? 'IA (Pretas)' : 'Você (Brancas)';
-        statusDiv.innerHTML = `<i class="fas fa-trophy"></i> ${winner} venceu por xeque-mate! <i class="fas fa-chess-king"></i>`;
-        statusDiv.style.color = "#ffd966";
-        gameOverFlag = true;
-        if (timerInterval) clearInterval(timerInterval);
-      } else if (game.in_stalemate()) statusDiv.innerHTML = `<i class="fas fa-handshake"></i> Afogamento! O jogo empatou.`;
-      else if (game.in_threefold_repetition()) statusDiv.innerHTML = `<i class="fas fa-repeat"></i> Repetição de movimentos: Empate.`;
-      else statusDiv.innerHTML = `<i class="fas fa-flag-checkered"></i> Fim de jogo.`;
-      return;
-    }
-    
-    if (game.in_check()) {
-      statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> XEQUE! O rei está ameaçado!`;
-      statusDiv.style.color = "#ffaa66";
+        return best
     } else {
-      statusDiv.innerHTML = `<i class="fas fa-chess-board"></i> Turno: ${game.turn() === 'w' ? '⭐ VOCÊ (Brancas)' : '🧠 IA (Pretas)'}`;
-      statusDiv.style.color = "#cdba87";
+        var best = 9999
+        for (var i = 0; i < moves.length; i++) {
+            game.move(moves[i])
+            best = Math.min(best, minimax(depth - 1, game, alpha, beta, true))
+            game.undo()
+            beta = Math.min(beta, best)
+            if (beta <= alpha) return best
+        }
+        return best
     }
-  }
-  
-  // Timer atualizado a cada segundo
-  function startTimer() {
-    if (timerInterval) clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-      if (gameOverFlag) return;
-      if (game.game_over()) return;
-      
-      if (game.turn() === 'w') {
-        if (whiteTime > 0) whiteTime--;
-      } else {
-        if (blackTime > 0) blackTime--;
-      }
-      
-      updateTimersDisplay();
-      
-      // Verificar estouro de tempo
-      if (whiteTime <= 0) {
-        gameOverFlag = true;
-        clearInterval(timerInterval);
-        document.getElementById('gameStatus').innerHTML = `<i class="fas fa-hourglass-end"></i> Tempo das BRANCAS esgotou! Vitória da IA.`;
-        gameOverFlag = true;
-      } else if (blackTime <= 0) {
-        gameOverFlag = true;
-        clearInterval(timerInterval);
-        document.getElementById('gameStatus').innerHTML = `<i class="fas fa-hourglass-end"></i> Tempo da IA esgotou! Você venceu! 🎉`;
-        gameOverFlag = true;
-      }
-    }, 1000);
-  }
-  
-  function updateTimersDisplay() {
-    const formatTime = (seconds) => {
-      const mins = Math.floor(seconds / 60);
-      const secs = seconds % 60;
-      return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-    };
-    document.getElementById('whiteTimer').innerText = formatTime(whiteTime);
-    document.getElementById('blackTimer').innerText = formatTime(blackTime);
-  }
-  
-  // Reset completo do jogo
-  function resetGame() {
-    if (timerInterval) clearInterval(timerInterval);
-    game = new Chess();
-    gameOverFlag = false;
-    whiteTime = 600;
-    blackTime = 600;
-    aiThinking = false;
-    if (board) board.position(game.fen());
-    updateTimersDisplay();
-    startTimer();
-    updateGameStatusMessage();
-    // se por acaso a IA for chamada indevidamente, não ocorre
-  }
-  
-  // Configuração do tabuleiro e inicialização
-  const configBoard = {
-    draggable: true,
-    position: 'start',
-    onDragStart: onDragStart,
-    onDrop: onDrop,
-    pieceTheme: 'https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/img/chesspieces/wikipedia/{piece}.png'
-  };
-  
-  board = Chessboard('board', configBoard);
-  startTimer();
-  updateGameStatusMessage();
-  
-  // Botão reset
-  document.getElementById('resetGameBtn').addEventListener('click', () => {
-    resetGame();
-    // Forçar reset visual do tabuleiro
-    board.position(game.fen());
-    updateGameStatusMessage();
-  });
-  
-  // Extra: Garantir que se a IA não tiver movimento, não travar
-  window.addEventListener('load', () => {
-    // Se algum movimento da IA precisar no início? Jogo começa com brancas, então ok.
-    console.log("IA pronta (Minimax profundidade 3). Boa sorte!");
-  });
+}
+
+function evaluateBoard(board) {
+    var total = 0
+    var values = { p: 10, r: 50, n: 30, b: 30, q: 90, k: 900 }
+
+    for (var i = 0; i < 8; i++) {
+        for (var j = 0; j < 8; j++) {
+            var piece = board[i][j]
+            if (piece !== null) {
+                var value = values[piece.type]
+                total += piece.color === 'w' ? value : -value
+            }
+        }
+    }
+    return total
+}
+
+function startTimer() {
+    setInterval(function() {
+        if (!game) return
+
+        if (game.turn() === 'w') whiteTime--
+        else blackTime--
+
+        document.getElementById("timer").innerText =
+            format(whiteTime) + " | " + format(blackTime)
+
+        if (whiteTime <= 0 || blackTime <= 0) {
+            alert("⏱️ Tempo acabou")
+            restartGame()
+        }
+
+    }, 1000)
+}
+
+function format(t) {
+    var m = Math.floor(t/60)
+    var s = t%60
+    return m + ':' + (s<10?'0'+s:s)
+}
+
 </script>
 </body>
 </html>
